@@ -13,22 +13,22 @@ import (
 
 func main() {
 
-    ifPtr := flag.String("interface", "all", "interface name")
-    timePtr := flag.Int("time", -1, "how long (sec) to run")
+	ifPtr := flag.String("interface", "all", "interface name")
+	timePtr := flag.Int("time", -1, "how long (sec) to run")
 
-    flag.Parse()
+	flag.Parse()
 
-    fmt.Println("interface:", *ifPtr)
-    fmt.Println("time:", *timePtr)
-    fmt.Println("tail:", flag.Args())
-    fmt.Println("time:", time.Second)
-    log.Println("go gocons")
-    
-    if *ifPtr == "all" {
+	fmt.Println("interface:", *ifPtr)
+	fmt.Println("time:", *timePtr)
+	fmt.Println("tail:", flag.Args())
+	fmt.Println("time:", time.Second)
+	log.Println("go gocons")
+
+	if *ifPtr == "all" {
 		list_ifs()
-    } else {
-    	capture(*ifPtr, "tcp[tcpflags] & (tcp-syn) != 0 and tcp[tcpflags] & (tcp-ack) == 0")		
-    }    
+	} else {
+		capture(*ifPtr, "tcp[tcpflags] & (tcp-syn) != 0 and tcp[tcpflags] & (tcp-ack) == 0")
+	}
 }
 
 
@@ -61,12 +61,12 @@ func list_ifs() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, dev := range devices {		
+	for _, dev := range devices {
 		for _, ifc := range dev.Addresses {
 			ip := net.IP.To4(ifc.IP)
 			if ip != nil && !net.IP.IsLoopback(ifc.IP) {
 				fmt.Println(dev.Name, ip)
 			}
-		}		
+		}
 	}
 }
