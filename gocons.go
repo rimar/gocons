@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"time"
+	"net"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
@@ -51,7 +52,6 @@ func capture(device string, filter string) string {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
 		fmt.Println(packet)
-		//if capture to pcap file enable then file_cap(packet) etc
 	}
 	return device
 }
@@ -61,8 +61,12 @@ func list_ifs() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for i := 0; i < len(devices); i++ {
-		dev := devices[i]
-		fmt.Println(dev.Name)
+	for _, dev := range devices {		
+		for _, ifc := range dev.Addresses {
+			ip := net.IP.To4(ifc.IP)
+			if ip != nil && !net.IP.IsLoopback(ifc.IP) {
+				fmt.Println(dev.Name, ip)
+			}
+		}		
 	}
 }
