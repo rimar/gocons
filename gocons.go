@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	ifPtr := flag.String("interface", "all", "interface name")
+	ifPtr := flag.String("if", "all", "interface name")
 	timePtr := flag.Int("time", -1, "how long (sec) to run")
 
 	flag.Parse()
