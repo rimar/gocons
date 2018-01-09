@@ -20,12 +20,13 @@ func main() {
 
 	fmt.Println("interface:", *ifPtr)
 	fmt.Println("time:", *timePtr)
-	fmt.Println("tail:", flag.Args())
-	fmt.Println("time:", time.Second)
-	log.Println("go gocons")
+	// fmt.Println("tail:", flag.Args())
+	// fmt.Println("time:", time.Second)
+	// log.Println("go gocons")
 
+	list_ifs()
 	if *ifPtr == "all" {
-		list_ifs()
+		fmt.Println("please supply the interface name using -if ifname flag")
 	} else {
 		capture(*ifPtr, "tcp[tcpflags] & (tcp-syn) != 0 and tcp[tcpflags] & (tcp-ack) == 0")
 	}
@@ -56,7 +57,8 @@ func capture(device string, filter string) string {
 	return device
 }
 
-func list_ifs() {
+func list_ifs() map[string]string {
+	res := map[string]string{}
 	devices, err := pcap.FindAllDevs()
 	if err != nil {
 		log.Fatal(err)
@@ -65,8 +67,10 @@ func list_ifs() {
 		for _, ifc := range dev.Addresses {
 			ip := net.IP.To4(ifc.IP)
 			if ip != nil && !net.IP.IsLoopback(ifc.IP) {
+				res[ip.String()] = dev.Name
 				fmt.Println(dev.Name, ip)
 			}
 		}
 	}
+	return res
 }
