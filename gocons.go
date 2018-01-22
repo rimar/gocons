@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
+	"github.com/google/gopacket/layers"
 )
 
 func main() {
@@ -24,16 +25,18 @@ func main() {
 	// fmt.Println("time:", time.Second)
 	// log.Println("go gocons")
 
-	list_ifs()
+	localIps := list_ifs()
 	if *ifPtr == "all" {
 		fmt.Println("please supply the interface name using -if ifname flag")
 	} else {
-		capture(*ifPtr, "tcp[tcpflags] & (tcp-syn) != 0 and tcp[tcpflags] & (tcp-ack) == 0")
+		capture(*ifPtr, "tcp[tcpflags] & (tcp-syn) != 0 and tcp[tcpflags] & (tcp-ack) == 0", localIps)
 	}
 }
 
 
-func capture(device string, filter string) string {
+func capture(device string, filter string, localIps map[string]string) string {
+
+	seen := map[string]bool{}
 
 	// Open device
 	handle, err := pcap.OpenLive(device, 100, false, time.Second)
@@ -52,7 +55,20 @@ func capture(device string, filter string) string {
 	// Process packets
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		fmt.Println(packet)
+		// Get the IPv4 layer from this packet
+		if ipLayer := packet.Layer(layers.LayerTypeIPv4); ipLayer != nil {
+			ip, _ := ipLayer.(*layers.IPv4)
+
+			// Get the TCP layer from this packet
+			if tcpLayer := packet.Layer(layers.LayerTypeTCP); tcpLayer != nil {
+				tcp, _ := tcpLayer.(*layers.TCP)
+				dst := fmt.Sprintf("%s:%d", ip.DstIP, tcp.DstPort)
+				if !seen[dst] {
+					seen[dst] = true
+					fmt.Println(dst)
+				}			  	
+			}
+		}
 	}
 	return device
 }
