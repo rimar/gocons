@@ -62,10 +62,10 @@ func capture(device string, filter string, localIps map[string]string) string {
 			// Get the TCP layer from this packet
 			if tcpLayer := packet.Layer(layers.LayerTypeTCP); tcpLayer != nil {
 				tcp, _ := tcpLayer.(*layers.TCP)
-				dst := fmt.Sprintf("%s:%d", ip.DstIP, tcp.DstPort)
-				if !seen[dst] {
-					seen[dst] = true
-					fmt.Println(dst)
+				flow := fmt.Sprintf("%s->%s:%d", ip.SrcIP, ip.DstIP, tcp.DstPort)
+				if !seen[flow] {
+					seen[flow] = true
+					fmt.Println(flow)
 				}			  	
 			}
 		}
